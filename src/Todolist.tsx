@@ -5,25 +5,30 @@ import {Button} from "./Button";
 type PropsType = {
     title: string
     tasks: TaskType[]
-    removeTask: (taskId: string) => void
-    changeFilter: (filter: FilterValuesType) => void
-    addTask: (title: string) => void
-    changeTaskStatus: (taskId: string, isDone: boolean) => void
+    removeTask: (taskId: string, todolistId: string) => void
+    todolistId: string
+    removeTodolist: (todolistId: string) => void
+    changeFilter: (filter: FilterValuesType, todolistId: string) => void
+    addTask: (title: string, todolistId: string) => void
+    changeTaskStatus: (taskId: string, isDone: boolean, todolistId: string) => void
     filter: FilterValuesType
 }
 
-export const Todolist = ({title, tasks, removeTask, changeFilter, addTask, changeTaskStatus, filter}: PropsType) => {
+export const Todolist = ({title, tasks, removeTask, todolistId, removeTodolist, changeFilter, addTask, changeTaskStatus, filter}: PropsType) => {
     const [taskTitle, setTaskTitle] = useState('')
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const addTaskHandler = () => {
         if (taskTitle.trim()) {
-            addTask(taskTitle.trim())
+            addTask(taskTitle.trim(), todolistId)
             setTaskTitle('')
         } else {
             setErrorMessage('Title is requred !')
         }
     }
 
+    const removeTodolistHandler = (todolistId: string) => {
+        removeTodolist(todolistId)
+    }
     const changeTaskTitleHandler = (event: ChangeEvent<HTMLInputElement>) => {
         setTaskTitle(event.currentTarget.value)
     }
@@ -38,13 +43,16 @@ export const Todolist = ({title, tasks, removeTask, changeFilter, addTask, chang
     const resetErrorMesage = () => {
         setErrorMessage(null)
     }
-    const changeFilterTasksHandler = (filter: FilterValuesType) => {
-        changeFilter(filter)
+    const changeFilterTasksHandler = (filter: FilterValuesType, todolistId: string) => {
+        changeFilter(filter, todolistId)
     }
 
     return (
         <div>
-            <h3>{title}</h3>
+            <div className={'todolist-title-container'}>
+                <h3>{title}</h3>
+                <Button onClick={() => removeTodolistHandler(todolistId)} title={'x'}/>
+            </div>
             <div>
                 <input className={errorMessage ? 'error' : ''}
                        value={taskTitle}
@@ -60,9 +68,9 @@ export const Todolist = ({title, tasks, removeTask, changeFilter, addTask, chang
                     ? <p>Тасок нет</p>
                     : <ul>
                         {tasks.map((task) => {
-                            const removeTaskHandler = () => removeTask(task.id)
+                            const removeTaskHandler = () => removeTask(task.id, todolistId)
                             const changeTaskStatusHandler = (e: ChangeEvent<HTMLInputElement>) => {
-                                changeTaskStatus(task.id, e.currentTarget.checked)
+                                changeTaskStatus(task.id, e.currentTarget.checked, todolistId)
                             }
 
                             return <li className={task.isDone ? 'is-done' : ''} key={task.id}>
@@ -77,11 +85,11 @@ export const Todolist = ({title, tasks, removeTask, changeFilter, addTask, chang
             }
             <div>
                 <Button className={filter == 'all' ? 'active-filter' : ''} title={'All'}
-                        onClick={() => changeFilterTasksHandler('all')}/>
+                        onClick={() => changeFilterTasksHandler('all', todolistId)}/>
                 <Button className={filter == 'active' ? 'active-filter' : ''} title={'Active'}
-                        onClick={() => changeFilterTasksHandler('active')}/>
+                        onClick={() => changeFilterTasksHandler('active', todolistId)}/>
                 <Button className={filter == 'completed' ? 'active-filter' : ''} title={'Completed'}
-                        onClick={() => changeFilterTasksHandler('completed')}/>
+                        onClick={() => changeFilterTasksHandler('completed', todolistId)}/>
             </div>
         </div>
     )
